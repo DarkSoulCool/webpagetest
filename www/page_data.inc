@@ -275,8 +275,11 @@ function loadPageStepData($localPaths, $runCompleted, $options = null, $testInfo
           $seek_start = $ret['chromeUserTiming.firstContentfulPaint'];
         elseif (isset($ret['render']) && $ret['render'] > 0)
           $seek_start = $ret['render'];
-        if ($seek_start > 0) 
+        if ($seek_start > 0) {
+          if (isset($ret['domContentLoadedEventEnd']) && $ret['domContentLoadedEventEnd'] > $seek_start)
+            $seek_start = $ret['domContentLoadedEventEnd'];
           $TTI = CalculateTimeToInteractive($localPaths, $seek_start, $ret['interactivePeriods'], $measurement_end, $first_interactive);
+        }
         if (isset($first_interactive) && $first_interactive > 0) {
           $ret['FirstInteractive'] = $first_interactive;
         }
@@ -425,6 +428,17 @@ function loadPageStepData($localPaths, $runCompleted, $options = null, $testInfo
               $name = 'lighthouse.' . str_replace(' ', '', $lh['name']);
               $score = floatval($lh['score']) / 100.0;
               $ret[$name] = $score;
+              if ($lh['name'] == 'Performance' && isset($lh['audits'])) {
+                foreach ($lh['audits'] as $audit) {
+                  if (isset($audit['id']) &&
+                      isset($audit['group']) &&
+                      $audit['group'] == 'perf-metric' &&
+                      isset($audit['result']['rawValue'])) {
+                    $name = 'lighthouse.' . str_replace(' ', '', $lh['name']) . '.' . str_replace(' ', '', $audit['id']);
+                    $ret[$name] = $audit['result']['rawValue'];
+                  }
+                }
+              }
             }
           }
         }
