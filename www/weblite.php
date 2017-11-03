@@ -2,7 +2,7 @@
 if( !defined('BARE_UI') )
     define('BARE_UI', true);
 include 'common.inc';
-
+include('footer.inc'); 
 // load the secret key (if there is one)
 $secret = '';
 $keys = parse_ini_file('./settings/keys.ini', true);
@@ -86,9 +86,6 @@ $page_description = "Comparison Test$testLabel.";
 
             </form>
 
-            <?php
-            include('footer.inc'); 
-            ?>
         </div>
 
         <script type="text/javascript">
